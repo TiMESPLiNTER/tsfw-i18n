@@ -1,13 +1,10 @@
 {
-    "name": "timesplinter/tsfw-routing",
+    "name": "timesplinter/tsfw-i18n",
     "type": "library",
-    "description": "PHP library to abstract common tasks with strings, array, etc.",
-    "keywords": ["tsFramework", "tsfw", "routing"],
-    "homepage": "http://github.com/TiMESPLiNTER/tsfw-routing",
+    "description": "PHP library to handle i18n (internationalization) of applications more easy",
+    "keywords": ["tsFramework", "tsfw", "i18n", "internationalization"],
+    "homepage": "http://github.com/TiMESPLiNTER/tsfw-i18n",
     "license": "LGPL",
-    "require": {
-        "php": ">=5.4.0"
-    },
     "autoload": {
         "psr-4": {
             "timesplinter\\": "src/timesplinter/"
@@ -21,6 +18,13 @@
             "role": "Company"
         }
     ],
+	
+	"require": {
+		"php": ">=5.4.0",
+		"timesplinter/tsfw-common": "0.1.0",
+		"maxakawizard/po-parser": "1.0.*"
+	},
+	
     "require-dev": {
         "phpunit/phpunit": "4.2.*"
     }
