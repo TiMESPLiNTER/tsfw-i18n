@@ -9,10 +9,16 @@ namespace timesplinter\tsfw\i18n\common;
 abstract class AbstractTranslator
 {
 	protected $directory;
-	
-	public function __construct($directory)
+	protected $defaultCodeSet;
+
+	/**
+	 * @param string $directory
+	 * @param string $defaultCodeSet
+	 */
+	public function __construct($directory, $defaultCodeSet)
 	{
 		$this->directory = $directory;
+		$this->defaultCodeSet = $defaultCodeSet;
 	}
 	
 	/**

@@ -18,20 +18,24 @@ class Localizer
 
 	/**
 	 * @param string $acceptedLanguagesString
+	 * @param array $fallBacks
 	 * @param string $default
+	 * @param array|null $categories
 	 *
 	 * @return Localizer
 	 */
-	public static function fromAcceptedLanguages($acceptedLanguagesString, $default = 'C', $categories = null)
+	public static function fromAcceptedLanguages($acceptedLanguagesString, array $fallBacks = array(), $default = 'C', array $categories = array(LC_ALL))
 	{
-		$acceptedLanguageArray = array();
-		$localeArr = array();
-		
+		$acceptedLanguageArray = array($default => 0.0);
+				
 		foreach(explode(',', $acceptedLanguagesString) as $lang) {
 			if(preg_match('/([a-z-]{2,})(?:;q=(.+))?/i', $lang, $matches) === 0)
 				continue;
 			
-			$acceptedLanguageArray[strtr($matches[1], array('-' => '_'))] = isset($matches[2]) ? (float)$matches[2] : 1.0;
+			$localeParts = explode('_', strtr($matches[1], array('-' => '_')));
+			$localeCode = strtolower($localeParts[0]) . (isset($localeParts[1]) ? '_' . strtoupper($localeParts[1]) : null);
+			
+			$acceptedLanguageArray[$localeCode] = isset($matches[2]) ? (float)$matches[2] : 1.0;
 		}
 		
 		uasort($acceptedLanguageArray, function($a, $b) {
@@ -39,14 +43,33 @@ class Localizer
 			elseif($a < $b) return 1;
 			else return 0;
 		});
-
-		$localizer = new Localizer();
 		
-		foreach($acceptedLanguageArray as $locale => $weight) {
-			$localeArr[LC_ALL][] = $locale;
+		sort($categories);
+		
+		$localesToSet = array_keys($acceptedLanguageArray);
+		
+		$localizer = new Localizer();
+		$localeArr = array_fill_keys($categories, $localesToSet);
+		
+		if(isset($localeArr[LC_ALL]) === true) {
+			// special case wa?
+			foreach($fallBacks as $cat => $localeMap) {
+				$localeArr[$cat] = $localeArr[LC_ALL];
+			}
 		}
-				
-		var_dump($localizer->setLocale($localeArr));
+		
+		foreach($localeArr as $cat => $locales) {
+			for($i = 0; $i < count($locales); ++$i) {
+				if(isset($fallBacks[$cat][$locales[$i]]) === false)
+					continue;
+
+				$localeArr[$cat][$i] = $fallBacks[$cat][$locales[$i]];
+			}
+			
+			$localeArr[$cat] = array_unique($localeArr[$cat]);
+		}
+		
+		$localizer->setLocale($localeArr);
 		
 		return $localizer;
 	}
@@ -54,12 +77,7 @@ class Localizer
 	protected function initLocaleCategories()
 	{
 		$this->localeCategories = array(
-			LC_ALL,
-			LC_COLLATE,
-			LC_CTYPE,
-			LC_MONETARY,
-			LC_NUMERIC,
-			LC_TIME
+			LC_ALL, LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC, LC_TIME
 		);
 		
 		if(defined('LC_MESSAGES') === true)
@@ -69,8 +87,9 @@ class Localizer
 	/**
 	 * @param array $locales A single locale value as string or an array with category and corresponding locale(s)
 	 *
-	 * @throws \UnexpectedValueException
 	 * @return array|bool Returns an array of the specific locale set for the provided categories or false
+	 * 
+	 * @throws \UnexpectedValueException
 	 */
 	public function setLocale(array $locales)
 	{

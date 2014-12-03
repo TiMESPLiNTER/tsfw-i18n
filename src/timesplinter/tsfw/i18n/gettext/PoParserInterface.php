@@ -10,17 +10,10 @@ interface PoParserInterface
 {
 	/**
 	 * @param string $filePath
-	 */
-	public function extract($filePath);
-
-	/**
-	 * @param string $msgId
-	 * @param string $msgIdPlural
-	 * @param int $n
-	 *
+	 * 
 	 * @return array
 	 */
-	public function getText($msgId, $msgIdPlural, $n);
+	public function extract($filePath);
 }
 
 /* EOF */ 

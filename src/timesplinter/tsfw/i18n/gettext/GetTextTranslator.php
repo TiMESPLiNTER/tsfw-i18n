@@ -18,13 +18,10 @@ class GetTextTranslator extends AbstractTranslator
 	protected $poParserInterface = null;
 	/** @var PoWriterInterface|null */
 	protected $poWriterInterface = null;
-	protected $defaultCodeSet;
 	
 	public function __construct($directory, $defaultCodeSet = 'UTF-8')
 	{
-		parent::__construct($directory);
-		
-		$this->defaultCodeSet = $defaultCodeSet;
+		parent::__construct($directory, $defaultCodeSet);
 	}
 	
 	/**
@@ -59,20 +56,30 @@ class GetTextTranslator extends AbstractTranslator
 		
 		$moFilePath = $translationFileDir . DIRECTORY_SEPARATOR . $textDomain . '.mo';
 		$poFilePath = $translationFileDir . DIRECTORY_SEPARATOR . $textDomain . '.po';
-		var_dump($moFilePath);
+		
 		if(file_exists($moFilePath) === true) {
 			$this->bendTextDomains[$textDomain]['file_path'] = $moFilePath;
+			$this->bendTextDomains[$textDomain]['type'] = 'mo';
 		} elseif($this->poParserInterface instanceof PoParserInterface === true && file_exists($poFilePath) === true) {
 			$this->bendTextDomains[$textDomain]['file_path'] = $poFilePath;
-			$this->bendTextDomains[$textDomain]['entries'] = $this->poParserInterface->read($poFilePath);
+			$this->bendTextDomains[$textDomain]['type'] = 'po';
+			$this->bendTextDomains[$textDomain]['entries'] = $this->poParserInterface->extract($poFilePath);
+			$this->bendTextDomains[$textDomain]['plural_expr'] = false;
+			
+			if(isset($this->bendTextDomains[$textDomain]['entries']['']) === true) {
+				foreach($this->bendTextDomains[$textDomain]['entries']['']['msgstr'] as $meta) {
+					if(preg_match('/Plural-Forms:\s+nplurals=(\d+);\s+(plural=[^;]+)/', $meta, $matches) === 0)
+						continue;
+
+					$this->bendTextDomains[$textDomain]['plural_expr'] = '$' . $matches[2] . ';';
+				}
+			}
 		}
 		
 		$textDomainCodeSet = ($codeSet !== null)?$codeSet:$this->defaultCodeSet;
 		
 		if(bind_textdomain_codeset($textDomain, $textDomainCodeSet) === $textDomainCodeSet)
 			$this->bendTextDomains[$textDomain]['code_set'] = $textDomainCodeSet;
-		
-		var_dump($this->bendTextDomains); 
 	}
 	
 	/**
@@ -86,6 +93,22 @@ class GetTextTranslator extends AbstractTranslator
 	 */
 	public function getText($message, $pluralMessage = null, $n = 0)
 	{
+		if(isset($this->bendTextDomains[$this->currentTextDomain]['entries']) === true) {
+			$msgstrOffset = (int)($n > 0);
+			
+			if($pluralMessage !== null) {
+				if(isset($this->bendTextDomains[$this->currentTextDomain]['plural_expr']) === true) {
+					$plural = 0;
+					
+					eval(strtr($this->bendTextDomains[$this->currentTextDomain]['plural_expr'], array('n' => $n)));
+
+					$msgstrOffset = (int)$plural;
+				}
+			}
+			
+			return isset($this->bendTextDomains[$this->currentTextDomain]['entries'][$message]['msgstr'][$msgstrOffset]) ? $this->bendTextDomains[$this->currentTextDomain]['entries'][$message]['msgstr'][$msgstrOffset] : $message;
+		}
+		
 		if($pluralMessage === null)
 			return gettext($message);
 	
