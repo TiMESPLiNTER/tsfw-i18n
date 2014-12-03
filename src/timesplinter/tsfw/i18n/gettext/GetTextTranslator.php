@@ -13,7 +13,6 @@ use timesplinter\tsfw\i18n\common\AbstractTranslator;
 class GetTextTranslator extends AbstractTranslator
 {
 	protected $bendTextDomains = array();
-	protected $currentTextDomain = null;
 	/** @var PoParserInterface|null */
 	protected $poParserInterface = null;
 	/** @var PoWriterInterface|null */
@@ -28,25 +27,18 @@ class GetTextTranslator extends AbstractTranslator
 	 * Set the current text domain
 	 *
 	 * @param string $textDomain The text domain to set active
-	 * @param string|null $codeSet Optional charset for this text domain
 	 *
 	 * @return string
 	 */
-	public function setTextDomain($textDomain, $codeSet = null)
+	public function setTextDomain($textDomain)
 	{
-		if(isset($this->bendTextDomains[$textDomain]) === false)
-			$this->bindTextDomain($textDomain, $codeSet);
-		
 		return $this->currentTextDomain = textdomain($textDomain);
 	}
 
 	/**
-	 * Register a new text domain
-	 *
-	 * @param string $textDomain The text domain to set active
-	 * @param string|null $codeSet Optional charset for this text domain
+	 * {@inheritdoc}
 	 */
-	protected function bindTextDomain($textDomain, $codeSet = null)
+	public function bindTextDomain($textDomain, $codeSet = null)
 	{
 		$this->bendTextDomains[$textDomain] = array();
 		
