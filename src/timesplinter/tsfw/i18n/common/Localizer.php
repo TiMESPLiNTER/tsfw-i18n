@@ -99,8 +99,10 @@ class Localizer
 			if(in_array($category, $this->localeCategories) === false)
 				throw new \UnexpectedValueException('Invalid category: ' . $category);
 			
-			if(($setCatLocale = setlocale($category, $catLocales)) !== false && in_array($category, array(LC_ALL, LC_MESSAGES)) === true)
+			if(($setCatLocale = setlocale($category, $catLocales)) !== false && in_array($category, array(LC_ALL, LC_MESSAGES)) === true) {
 				putenv('LANG=' . $setCatLocale);
+				putenv('LANGUAGE=' . $setCatLocale);
+			}
 			
 			$localesSet[$category] = $setCatLocale;
 		}
@@ -118,7 +120,10 @@ class Localizer
 		$currentLocales = array();
 		
 		foreach($this->localeCategories as $category) {
-			$currentLocales[$category] = setlocale($category, '0');
+			if($category === LC_ALL)
+				continue;
+			
+			$currentLocales[$category] = setlocale($category, 0);
 		}
 		
 		return $currentLocales;
