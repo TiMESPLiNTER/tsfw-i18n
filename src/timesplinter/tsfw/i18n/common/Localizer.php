@@ -99,9 +99,7 @@ class Localizer
 			if(in_array($category, $this->localeCategories) === false)
 				throw new \UnexpectedValueException('Invalid category: ' . $category);
 			
-			$setCatLocale = setlocale($category, $catLocales);
-			
-			if(in_array($category, array(LC_ALL, LC_MESSAGES)) === true)
+			if(($setCatLocale = setlocale($category, $catLocales)) !== false && in_array($category, array(LC_ALL, LC_MESSAGES)) === true)
 				putenv('LANG=' . $setCatLocale);
 			
 			$localesSet[$category] = $setCatLocale;
