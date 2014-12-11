@@ -17,21 +17,21 @@ class LocalizerTest extends \PHPUnit_Framework_TestCase
 		$defaultLocales = $localizer->getLocales();
 		
 		$currentLocales = $localizer->getLocales();
-		$currentLocales[LC_ALL] = 'en_US';
-		$currentLocales[LC_COLLATE] = 'en_US';
-		$currentLocales[LC_CTYPE] = 'en_US';
-		$currentLocales[LC_MONETARY] = 'en_US';
-		$currentLocales[LC_NUMERIC] = 'en_US';
-		$currentLocales[LC_TIME] = 'en_US';
+		$currentLocales[LC_ALL] = 'en_US.UTF-8';
+		$currentLocales[LC_COLLATE] = 'en_US.UTF-8';
+		$currentLocales[LC_CTYPE] = 'en_US.UTF-8';
+		$currentLocales[LC_MONETARY] = 'en_US.UTF-8';
+		$currentLocales[LC_NUMERIC] = 'en_US.UTF-8';
+		$currentLocales[LC_TIME] = 'en_US.UTF-8';
 		
 		if(defined('LC_MESSAGES'))
-			$currentLocales[LC_MESSAGES] = 'en_US';
+			$currentLocales[LC_MESSAGES] = 'en_US.UTF-8';
 
-		$this->assertEquals(array(LC_ALL => 'en_US'), $localizer->setLocale(array(LC_ALL => 'en_US')), 'Set single locale which exists');
+		$this->assertEquals(array(LC_ALL => 'en_US.UTF-8'), $localizer->setLocale(array(LC_ALL => 'en_US.UTF-8')), 'Set single locale which exists');
 		$this->assertEquals(array(LC_ALL => false), $localizer->setLocale(array(LC_ALL => 'foobar')), 'Set single locale which does not exist');
 
 		$this->assertEquals($currentLocales, $localizer->getLocales(), 'Compare locale list');
-		$this->assertEquals('en_US', $localizer->getLocale(LC_ALL), 'Compare locale category');
+		$this->assertEquals('en_US.UTF-8', $localizer->getLocale(LC_ALL), 'Compare locale category');
 		
 		$this->assertEquals($defaultLocales, $localizer->setLocale($defaultLocales));
 		$this->assertEquals($defaultLocales, $localizer->getLocales(), 'Same as initial locales');
