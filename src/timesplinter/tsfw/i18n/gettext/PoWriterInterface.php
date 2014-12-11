@@ -8,7 +8,13 @@ namespace timesplinter\tsfw\i18n\gettext;
  */
 interface PoWriterInterface
 {
-	public function write($filePath);
+	/**
+	 * @param string $filePath
+	 * @param array $entries
+	 *
+	 * @return bool
+	 */
+	public function write($filePath, array $entries);
 }
 
 /* EOF */ 

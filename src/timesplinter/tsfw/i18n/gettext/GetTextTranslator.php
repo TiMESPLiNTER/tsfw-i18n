@@ -12,6 +12,7 @@ use timesplinter\tsfw\i18n\common\AbstractTranslator;
  */
 class GetTextTranslator extends AbstractTranslator
 {
+	protected $defaultPluralRule = 'plural=(n != 1)';
 	protected $bendTextDomains = array();
 	/** @var PoParserInterface|null */
 	protected $poParserInterface = null;
@@ -52,19 +53,27 @@ class GetTextTranslator extends AbstractTranslator
 		if(file_exists($moFilePath) === true) {
 			$this->bendTextDomains[$textDomain]['file_path'] = $moFilePath;
 			$this->bendTextDomains[$textDomain]['type'] = 'mo';
-		} elseif($this->poParserInterface instanceof PoParserInterface === true && file_exists($poFilePath) === true) {
+		} elseif($this->poParserInterface instanceof PoParserInterface === true) {
 			$this->bendTextDomains[$textDomain]['file_path'] = $poFilePath;
 			$this->bendTextDomains[$textDomain]['type'] = 'po';
-			$this->bendTextDomains[$textDomain]['entries'] = $this->poParserInterface->extract($poFilePath);
 			$this->bendTextDomains[$textDomain]['plural_expr'] = false;
 			
-			if(isset($this->bendTextDomains[$textDomain]['entries']['']) === true) {
-				foreach($this->bendTextDomains[$textDomain]['entries']['']['msgstr'] as $meta) {
-					if(preg_match('/Plural-Forms:\s+nplurals=(\d+);\s+(plural=[^;]+)/', $meta, $matches) === 0)
-						continue;
+			if(file_exists($poFilePath) === true) {
+				$this->bendTextDomains[$textDomain]['entries'] = $this->poParserInterface->extract($poFilePath);
+				$this->bendTextDomains[$textDomain]['plural_expr'] = '$' . $this->defaultPluralRule . ';'; // Default plural rule
+				$this->bendTextDomains[$textDomain]['plurals'] = 2;
+				
+				if(isset($this->bendTextDomains[$textDomain]['entries']['']) === true) {
+					foreach($this->bendTextDomains[$textDomain]['entries']['']['msgstr'] as $meta) {
+						if(preg_match('/Plural-Forms:\s+nplurals=(\d+);\s+(plural=[^;]+)/', $meta, $matches) === 0)
+							continue;
 
-					$this->bendTextDomains[$textDomain]['plural_expr'] = '$' . $matches[2] . ';';
+						$this->bendTextDomains[$textDomain]['plurals'] = (int)$matches[1];
+						$this->bendTextDomains[$textDomain]['plural_expr'] = '$' . $matches[2] . ';';
+					}
 				}
+			} elseif($this->poWriterInterface instanceof PoWriterInterface) {
+				$this->bendTextDomains[$textDomain]['entries'] = array();
 			}
 		}
 		
@@ -85,8 +94,11 @@ class GetTextTranslator extends AbstractTranslator
 	 */
 	public function getText($message, $pluralMessage = null, $n = 0)
 	{
+		if($n !== 0 && $pluralMessage === null)
+			throw new \InvalidArgumentException('You have to provide a plural message string');
+		
 		if(isset($this->bendTextDomains[$this->currentTextDomain]['entries']) === true) {
-			$msgstrOffset = (int)($n > 0);
+			$msgstrOffset = 0;
 			
 			if($pluralMessage !== null) {
 				if(isset($this->bendTextDomains[$this->currentTextDomain]['plural_expr']) === true) {
@@ -98,13 +110,43 @@ class GetTextTranslator extends AbstractTranslator
 				}
 			}
 			
-			return isset($this->bendTextDomains[$this->currentTextDomain]['entries'][$message]['msgstr'][$msgstrOffset]) ? $this->bendTextDomains[$this->currentTextDomain]['entries'][$message]['msgstr'][$msgstrOffset] : $message;
+			if(isset($this->bendTextDomains[$this->currentTextDomain]['entries'][$message]['msgstr'][$msgstrOffset])) {
+				if(strlen($this->bendTextDomains[$this->currentTextDomain]['entries'][$message]['msgstr'][$msgstrOffset]) === 0)
+					return ($msgstrOffset === 0) ? $message : $pluralMessage;
+				
+				return $this->bendTextDomains[$this->currentTextDomain]['entries'][$message]['msgstr'][$msgstrOffset];
+			} else {
+				if($this->poWriterInterface instanceof PoWriterInterface) {
+					$this->bendTextDomains[$this->currentTextDomain]['entries'][$message]['msgid'] = $message;
+					$this->bendTextDomains[$this->currentTextDomain]['entries'][$message]['msgstr'][] = '';
+
+					if($pluralMessage !== null) {
+						$this->bendTextDomains[$this->currentTextDomain]['entries'][$message]['msgid_plural'] = $pluralMessage;
+						$this->bendTextDomains[$this->currentTextDomain]['entries'][$message]['msgstr'] = array_fill(0 , $this->bendTextDomains[$this->currentTextDomain]['plurals'], '');
+					}
+				}
+
+				return ($msgstrOffset === 0) ? $message : $pluralMessage;
+			}
 		}
 		
 		if($pluralMessage === null)
 			return gettext($message);
 	
 		return ngettext($message, $pluralMessage, $n);
+	}
+	
+	public function __destruct()
+	{
+		if($this->poWriterInterface instanceof PoWriterInterface === false)
+			return;
+		
+		foreach($this->bendTextDomains as $domain => $info) {
+			if(isset($info['entries']) === false)
+				continue;
+			
+			$this->poWriterInterface->write($info['file_path'], $info['entries']);
+		}
 	}
 
 	/**
@@ -119,11 +161,22 @@ class GetTextTranslator extends AbstractTranslator
 
 	/**
 	 * Enables support for PO files if a parser is set
-	 * @param PoParserInterface $parser
+	 * 
+	 * @param PoParserInterface $poParser
 	 */
-	public function setPoParser(PoParserInterface $parser)
+	public function setPoParser(PoParserInterface $poParser)
 	{
-		$this->poParserInterface = $parser;
+		$this->poParserInterface = $poParser;
+	}
+
+	/**
+	 * Enables auto creation of PO files if a writer is set
+	 * 
+	 * @param PoWriterInterface $poWriter
+	 */
+	public function setPoWriter(PoWriterInterface $poWriter)
+	{
+		$this->poWriterInterface = $poWriter;
 	}
 }
 
