@@ -44,21 +44,21 @@ class LocalizerTest extends \PHPUnit_Framework_TestCase
 		$defaultLocales = $localizer->getLocales();
 		
 		$currentLocales = array(
-			0 => 'en_US/en_US/en_US/en_US/de_DE/en_US',
-			1 => 'en_US',
-			2 => 'en_US',
-			3 => 'en_US',
-			4 => 'en_US',
-			5 => 'de_DE',
-			6 => 'en_US'
+			0 => 'en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/de_DE.UTF-8/en_US.UTF-8',
+			1 => 'en_US.UTF-8',
+			2 => 'en_US.UTF-8',
+			3 => 'en_US.UTF-8',
+			4 => 'en_US.UTF-8',
+			5 => 'de_DE.UTF-8',
+			6 => 'en_US.UTF-8'
 		);
 
-		$this->assertEquals(array(LC_ALL => 'en_US', LC_TIME => 'de_DE'), $localizer->setLocale(array(LC_ALL => 'en_US', LC_TIME => 'de_DE')), 'Set single locale which exists');
+		$this->assertEquals(array(LC_ALL => 'en_US.UTF-8', LC_TIME => 'de_DE.UTF-8'), $localizer->setLocale(array(LC_ALL => 'en_US.UTF-8', LC_TIME => 'de_DE.UTF-8')), 'Set single locale which exists');
 		$this->assertEquals(array(LC_ALL => false, LC_TIME => false), $localizer->setLocale(array(LC_ALL => 'foo', LC_TIME => 'bar')), 'Set single locale which does not exist');
 
 		$this->assertEquals($currentLocales, $localizer->getLocales(), 'Compare locale list');
-		$this->assertEquals('en_US/en_US/en_US/en_US/de_DE/en_US', $localizer->getLocale(LC_ALL), 'Compare locale category LC_ALL');
-		$this->assertEquals('de_DE', $localizer->getLocale(LC_TIME), 'Compare locale category LC_TIME');
+		$this->assertEquals('en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/de_DE.UTF-8/en_US.UTF-8', $localizer->getLocale(LC_ALL), 'Compare locale category LC_ALL');
+		$this->assertEquals('de_DE.UTF-8', $localizer->getLocale(LC_TIME), 'Compare locale category LC_TIME');
 
 		$this->assertEquals($defaultLocales, $localizer->setLocale($defaultLocales));
 		$this->assertEquals($defaultLocales, $localizer->getLocales(), 'Same as initial locales');
@@ -69,15 +69,15 @@ class LocalizerTest extends \PHPUnit_Framework_TestCase
 		$localizer = new Localizer();
 		
 		$currentLocales = array(
-			LC_ALL => 'en_US',
-			LC_TIME => 'de_DE'
+			LC_ALL => 'en_US.UTF-8',
+			LC_TIME => 'de_DE.UTF-8'
 		);
 		
-		$this->assertEquals(array(LC_ALL => 'en_US'), $localizer->setLocale(array(LC_ALL => array('foo', 'en_US', 'bar'))), 'Illegal locales');
+		$this->assertEquals(array(LC_ALL => 'en_US.UTF-8'), $localizer->setLocale(array(LC_ALL => array('foo', 'en_US.UTF-8', 'bar'))), 'Illegal locales');
 
 		$localesArr = array(
-			LC_ALL => array('foo', 'en_US', 'bar'),
-			LC_TIME => array('foo', 'de_DE', 'baz')
+			LC_ALL => array('foo', 'en_US.UTF-8', 'bar'),
+			LC_TIME => array('foo', 'de_DE.UTF-8', 'baz')
 		);
 		
 		$this->assertEquals($currentLocales, $localizer->setLocale($localesArr), 'Illegal locales');
