@@ -44,12 +44,12 @@ class LocalizerTest extends \PHPUnit_Framework_TestCase
 		$defaultLocales = $localizer->getLocales();
 		
 		$currentLocales = array(
-			1 => 'en_US.UTF-8',
-			2 => 'en_US.UTF-8',
-			3 => 'en_US.UTF-8',
-			4 => 'en_US.UTF-8',
-			5 => 'de_DE.UTF-8',
-			6 => 'en_US.UTF-8'
+			LC_MESSAGES => 'en_US.UTF-8',
+			LC_COLLATE => 'en_US.UTF-8',
+			LC_MONETARY => 'en_US.UTF-8',
+			LC_NUMERIC => 'en_US.UTF-8',
+			LC_TIME => 'de_DE.UTF-8',
+			LC_CTYPE => 'en_US.UTF-8'
 		);
 
 		$this->assertEquals(array(LC_ALL => 'en_US.UTF-8', LC_TIME => 'de_DE.UTF-8'), $localizer->setLocale(array(LC_ALL => 'en_US.UTF-8', LC_TIME => 'de_DE.UTF-8')), 'Set single locale which exists');
