@@ -4,51 +4,8 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "7bd2d30d499d0d4fc695a0c6875bda5b",
+    "hash": "53678c7d18483cbca6b42fb52e0411c6",
     "packages": [
-        {
-            "name": "maxakawizard/po-parser",
-            "version": "1.0.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/MAXakaWIZARD/PoParser.git",
-                "reference": "75dd4056c25fbdbf46c5bffbf069fae685dfc475"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/MAXakaWIZARD/PoParser/zipball/75dd4056c25fbdbf46c5bffbf069fae685dfc475",
-                "reference": "75dd4056c25fbdbf46c5bffbf069fae685dfc475",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "PoParser": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Max Grigorian",
-                    "email": "maxakawizard@gmail.com"
-                }
-            ],
-            "description": "Gettext *.po parser for PHP",
-            "homepage": "http://github.com/MAXakaWIZARD/PoParser",
-            "keywords": [
-                "gettext",
-                "i18n",
-                "l10n",
-                "po"
-            ],
-            "time": "2014-08-13 10:28:05"
-        },
         {
             "name": "timesplinter/tsfw-common",
             "version": "v0.1.0",
