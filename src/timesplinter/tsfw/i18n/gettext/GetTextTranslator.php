@@ -49,32 +49,30 @@ class GetTextTranslator extends AbstractTranslator
 		
 		$moFilePath = $translationFileDir . DIRECTORY_SEPARATOR . $textDomain . '.mo';
 		$poFilePath = $translationFileDir . DIRECTORY_SEPARATOR . $textDomain . '.po';
-		
+
 		if(file_exists($moFilePath) === true) {
 			$this->bendTextDomains[$textDomain]['file_path'] = $moFilePath;
 			$this->bendTextDomains[$textDomain]['type'] = 'mo';
-		} elseif($this->poParserInterface instanceof PoParserInterface === true) {
+		} elseif(file_exists($poFilePath) === true && $this->poParserInterface instanceof PoParserInterface === true) {
 			$this->bendTextDomains[$textDomain]['file_path'] = $poFilePath;
 			$this->bendTextDomains[$textDomain]['type'] = 'po';
 			$this->bendTextDomains[$textDomain]['plural_expr'] = false;
-			
-			if(file_exists($poFilePath) === true) {
-				$this->bendTextDomains[$textDomain]['entries'] = $this->poParserInterface->extract($poFilePath);
-				$this->bendTextDomains[$textDomain]['plural_expr'] = '$' . $this->defaultPluralRule . ';'; // Default plural rule
-				$this->bendTextDomains[$textDomain]['plurals'] = 2;
-				
-				if(isset($this->bendTextDomains[$textDomain]['entries']['']) === true) {
-					foreach($this->bendTextDomains[$textDomain]['entries']['']['msgstr'] as $meta) {
-						if(preg_match('/Plural-Forms:\s+nplurals=(\d+);\s+(plural=[^;]+)/', $meta, $matches) === 0)
-							continue;
 
-						$this->bendTextDomains[$textDomain]['plurals'] = (int)$matches[1];
-						$this->bendTextDomains[$textDomain]['plural_expr'] = '$' . $matches[2] . ';';
-					}
+			$this->bendTextDomains[$textDomain]['entries'] = $this->poParserInterface->extract($poFilePath);
+			$this->bendTextDomains[$textDomain]['plural_expr'] = '$' . $this->defaultPluralRule . ';'; // Default plural rule
+			$this->bendTextDomains[$textDomain]['plurals'] = 2;
+
+			if(isset($this->bendTextDomains[$textDomain]['entries']['']) === true) {
+				foreach($this->bendTextDomains[$textDomain]['entries']['']['msgstr'] as $meta) {
+					if(preg_match('/Plural-Forms:\s+nplurals=(\d+);\s+(plural=[^;]+)/', $meta, $matches) === 0)
+						continue;
+
+					$this->bendTextDomains[$textDomain]['plurals'] = (int)$matches[1];
+					$this->bendTextDomains[$textDomain]['plural_expr'] = '$' . $matches[2] . ';';
 				}
-			} elseif($this->poWriterInterface instanceof PoWriterInterface) {
-				$this->bendTextDomains[$textDomain]['entries'] = array();
 			}
+		} else {
+			return;
 		}
 		
 		$textDomainCodeSet = ($codeSet !== null)?$codeSet:$this->defaultCodeSet;
